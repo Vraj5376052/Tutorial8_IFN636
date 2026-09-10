@@ -47,8 +47,13 @@ class Executor:
             print(f"[{self._ts()}] Error in job {e.job_id}: {e}")
 
     def run(self) -> None:
+        # Activity 2: start higher priority jobs first. getattr keeps this working
+        # for plain Jobs, which have no priority at all, they default to 99 and
+        # go last. That way the base class never needed changing.
+        ordered = sorted(self.jobs, key=lambda j: getattr(j, "priority", 99))
+
         threads: List[threading.Thread] = []
-        for job in self.jobs:
+        for job in ordered:
             t = threading.Thread(target=self.run_job, args=(job,))
             threads.append(t)
             t.start()
